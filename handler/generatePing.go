@@ -9,8 +9,8 @@ import (
 type GeneratePingRequest struct{}
 
 type GeneratePingResponse struct {
-	UriPdf string `json:"uriPdf"`
-	UriTex string `json:"uriTex"`
+	FileNamePdf string `json:"fileNamePdf"`
+	FileNameTex string `json:"fileNameTex"`
 }
 
 func (h *Handler) GeneratePing(c *gin.Context) {
@@ -23,8 +23,8 @@ func (h *Handler) GeneratePing(c *gin.Context) {
 	}
 
 	response := GeneratePingResponse{
-		UriPdf: "/static/gen/ping.pdf",
-		UriTex: "/static/tex/ping.tex",
+		FileNamePdf: "ping.pdf",
+		FileNameTex: "ping.tex",
 	}
 
 	h.okResponse(c, response)
