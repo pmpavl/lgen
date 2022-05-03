@@ -7,8 +7,6 @@ import (
 	"github.com/rs/zerolog"
 )
 
-const nsToms float64 = 1000 * 1000
-
 func Logger(log *zerolog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		startTime := time.Now()
@@ -23,7 +21,7 @@ func Logger(log *zerolog.Logger) gin.HandlerFunc {
 		// After request
 
 		logRequest.
-			Float64("latency_ms", float64(time.Since(startTime).Nanoseconds())/nsToms).
+			Float64("latency_ms", float64(time.Since(startTime).Nanoseconds())/float64(time.Millisecond)).
 			Int("status", c.Writer.Status()).
 			Msg("request")
 	}

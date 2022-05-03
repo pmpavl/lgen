@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	storage "github.com/pmpavl/lgen-storage"
+	"github.com/pmpavl/lgen/pkg/log"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -19,12 +19,13 @@ func (r *Resource) getMongo(ctx context.Context) error {
 		return fmt.Errorf("mongo connect: %s", err)
 	}
 
-	storage, err := storage.Get(ctx, client)
-	if err != nil {
-		return fmt.Errorf("get storage: %s", err)
+	if err := client.Ping(ctx, nil); err != nil {
+		return fmt.Errorf("client ping: %s", err)
 	}
 
-	r.Storage = storage
+	r.Mongo = client
+
+	log.Logger.Info().Msg("get mongo success")
 
 	return nil
 }

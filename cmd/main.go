@@ -5,16 +5,16 @@ import (
 	"errors"
 	"net/http"
 
-	context_os "github.com/pmpavl/lgen-context-os"
-	log "github.com/pmpavl/lgen-log"
 	"github.com/pmpavl/lgen/app"
+	"github.com/pmpavl/lgen/pkg/context_os"
+	"github.com/pmpavl/lgen/pkg/log"
 )
 
 const ServiceName string = "lgen"
 
 func main() {
 	logger := log.For(ServiceName)
-	ctx := context_os.Context(context.Background())
+	ctx := context_os.Get(context.Background())
 	a := app.Get(logger)
 
 	if err := a.Run(ctx); !errors.Is(err, nil) &&

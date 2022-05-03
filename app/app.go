@@ -2,15 +2,15 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-	log "github.com/pmpavl/lgen-log"
-	"github.com/pmpavl/lgen/app/middleware"
 	"github.com/pmpavl/lgen/handler"
+	"github.com/pmpavl/lgen/pkg/storage"
+	"github.com/pmpavl/lgen/pkg/tex"
 	"github.com/pmpavl/lgen/resource"
-	"github.com/pmpavl/lgen/tex"
 	"github.com/rs/zerolog"
+	"golang.org/x/sync/errgroup"
 )
 
 type App struct {
@@ -21,30 +21,36 @@ func Get(l *zerolog.Logger) *App {
 	return &App{logger: l}
 }
 
-func (a *App) Run(ctx context.Context) error {
+func (a *App) Run(ctx context.Context) error { // TODO: Нужно проинициализировать public/gen и public/tex
 	res := resource.Get(ctx)
+	storage := storage.Get(ctx, res.Mongo)
 	tex := tex.Get()
-	h := handler.Get(res.Storage, tex)
-
-	router := gin.New()
-
-	router.Use(middleware.Logger(log.For("http-server")))
-
-	// Mount Handler
-	router.POST("/app/generate/leaflet", h.GenerateLeaflet)
+	h := handler.Get(storage, tex)
 
 	srv := &http.Server{
-		Addr:    res.Env.ServiceHTTPPort,
-		Handler: router,
+		Addr:    fmt.Sprintf(":%d", res.Env.ServiceHTTPPort),
+		Handler: a.ginRouter(h),
 	}
 
-	go func() {
+	group, ctx := errgroup.WithContext(ctx)
+
+	group.Go(func() error {
+		a.logger.Info().Int("port", res.Env.ServiceHTTPPort).Msg("start http")
+
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			a.logger.Fatal().Msgf("listen: %s\n", err)
+			a.logger.Err(err).Msg("listen and serve")
+
+			return err
 		}
-	}()
 
-	<-ctx.Done()
+		return nil
+	})
 
-	return srv.Shutdown(ctx)
+	group.Go(func() error {
+		<-ctx.Done()
+
+		return srv.Shutdown(ctx)
+	})
+
+	return group.Wait()
 }

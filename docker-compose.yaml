@@ -1,0 +1,25 @@
+version: "3.9"
+
+networks:
+  default:
+    name: lgen_network
+
+volumes:
+  mongo_data:
+    name: mongo_data
+  mongo_config:
+    name: mongo_config
+
+services:
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: $MONGO_INITDB_ROOT_USERNAME
+      MONGO_INITDB_ROOT_PASSWORD: $MONGO_INITDB_ROOT_PASSWORD
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb

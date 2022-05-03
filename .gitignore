@@ -1,6 +1,9 @@
 ### dotenv ###
 .env
 
+### service ###
+public/
+
 ### Go ###
 # Binaries for programs and plugins
 *.exe

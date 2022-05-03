@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/pmpavl/lgen-log"
-	storage "github.com/pmpavl/lgen-storage"
+	"github.com/pmpavl/lgen/pkg/log"
+	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/sync/errgroup"
 )
 
 type Resource struct {
-	Env     *Env
-	Storage *storage.Storage
+	Env   *Env
+	Mongo *mongo.Client
 }
 
 func Get(ctx context.Context) *Resource {
@@ -25,6 +25,9 @@ func Get(ctx context.Context) *Resource {
 	if err := r.getEnv(ctx); err != nil {
 		log.Logger.Fatal().Err(err).Msg("get env")
 	}
+
+	setLogger(r)
+	setGinMode(r)
 
 	group, ctx := errgroup.WithContext(ctx)
 
@@ -40,12 +43,12 @@ func Get(ctx context.Context) *Resource {
 		log.Logger.Fatal().Err(err).Msg("get resource")
 	}
 
-	return r.
-		setLogger().
-		setGinMode()
+	log.Logger.Info().Msg("get resource success")
+
+	return r
 }
 
-func (r *Resource) setLogger() *Resource {
+func setLogger(r *Resource) {
 	logLevel, err := log.ParseLogLevel(r.Env.LogLevel)
 	if err != nil {
 		log.Logger.Warn().Err(err).Msg("parse log level")
@@ -64,10 +67,10 @@ func (r *Resource) setLogger() *Resource {
 		log.SetGlobalFormat(logFormat)
 	}
 
-	return r
+	return
 }
 
-func (r *Resource) setGinMode() *Resource {
+func setGinMode(r *Resource) {
 	switch r.Env.GinMode {
 	case gin.DebugMode:
 		gin.SetMode(gin.DebugMode)
@@ -80,12 +83,10 @@ func (r *Resource) setGinMode() *Resource {
 			Err(fmt.Errorf("no such gin mode: %s", r.Env.GinMode)).
 			Msg("set gin mode")
 
-		return r
+		return
 	}
 
-	log.Logger.Log().Msgf("gin mode set to %s",
-		gin.Mode(),
-	)
+	log.Logger.Info().Msgf("gin mode set to %s", gin.Mode())
 
-	return r
+	return
 }

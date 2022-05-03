@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pmpavl/lgen/pkg/log"
 	"github.com/sethvargo/go-envconfig"
 )
 
 type Env struct {
 	ServiceName     string `env:"SERVICE_NAME, default=lgen"`
-	ServiceHTTPPort string `env:"SERVICE_HTTP_PORT, default=:8080"`
+	ServiceHTTPPort int    `env:"SERVICE_HTTP_PORT, default=7784"`
 	LogLevel        string `env:"LOG_LEVEL, default=info"`
 	LogFormat       string `env:"LOG_FORMAT, default=console"`
 	GinMode         string `env:"GIN_MODE, default=release"`
@@ -24,6 +25,8 @@ func (r *Resource) getEnv(ctx context.Context) error {
 	}
 
 	r.Env = &env
+
+	log.Logger.Info().Msg("get env success")
 
 	return nil
 }

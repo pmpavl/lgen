@@ -6,7 +6,7 @@ import (
 	"sort"
 
 	"github.com/joho/godotenv"
-	log "github.com/pmpavl/lgen-log"
+	"github.com/pmpavl/lgen/pkg/log"
 )
 
 const dotEnvFilePath string = ".env"
@@ -32,9 +32,7 @@ func (r *Resource) loadDotEnv() error {
 // Print dotEnv read map with pretty format.
 func dotEnvReadLog(dotEnvRead map[string]string) {
 	if len(dotEnvRead) == 0 {
-		log.Logger.Log().Msgf("no env in %s file",
-			string(dotEnvFilePath),
-		)
+		log.Logger.Info().Msg("dotenv empty")
 
 		return
 	}
@@ -47,12 +45,12 @@ func dotEnvReadLog(dotEnvRead map[string]string) {
 
 	sort.Strings(dotEnvReadSlice)
 
-	dotEnvReadLog := fmt.Sprintf("env read from %s", dotEnvFilePath)
+	dotEnvReadLog := fmt.Sprintf("get dotenv success")
 	for _, env := range dotEnvReadSlice {
 		dotEnvReadLog += fmt.Sprintf("\n\t%s: %s", env, dotEnvRead[env])
 	}
 
-	log.Logger.Log().Msg(dotEnvReadLog)
+	log.Logger.Info().Msg(dotEnvReadLog)
 
 	return
 }
